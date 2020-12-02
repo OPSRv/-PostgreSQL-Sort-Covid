@@ -10,10 +10,13 @@ class GetCOVID19:
         self.__COVID19API = COVID19API
         self.__db = psycopg2.connect(database='covid_19', user=USER, password=PASSWORD, host=HOST)
         self.__cursor = self.__db.cursor()
-        self.__cursor.execute("CREATE DATABASE covid_19")
-        self.__cursor.execute("USE covid_19")
+        self.__cursor.execute("SELECT COUNT(*) = 0 FROM pg_catalog.pg_database WHERE datname = 'covid_19'")
+        not_exists_row = self.__cursor.fetchone()
+        not_exists = not_exists_row[0]
+        if not_exists:
+            self.__cursor.execute('CREATE DATABASE covid_19')
         self.__cursor.execute(
-            "CREATE TABLE sort_covid_19 (id SERIAL, Country VARCHAR(64), CountryCode VARCHAR(3), Slug VARCHAR(128), NewConfirmed INT, TotalConfirmed INT, NewDeaths INT, TotalDeaths INT, NewRecovered INT, TotalRecovered INT, Date VARCHAR(128))")
+            "CREATE TABLE IF NOT EXISTS sort_covid_19 (id SERIAL, Country VARCHAR(64), CountryCode VARCHAR(3), Slug VARCHAR(128), NewConfirmed INT, TotalConfirmed INT, NewDeaths INT, TotalDeaths INT, NewRecovered INT, TotalRecovered INT, Date VARCHAR(128))")
         self.__get_covid19_info()
 
     def __get_covid19_info(self):
